@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
         write(c_socket,buff_rcv,strlen(buff_rcv)+1);
     }
     close(c_socket);
-
+c
 
 
 

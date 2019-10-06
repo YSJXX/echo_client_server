@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 #define BUFF_SIZE 1024
-
+c
 int main(int argc,char * argv[])
 {
     int c_socket = socket(AF_INET,SOCK_STREAM,0);
