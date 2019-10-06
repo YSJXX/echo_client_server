@@ -43,12 +43,13 @@ int main(int argc, char* argv[])
         return -1;
     }
 
+    int client_addr_size = sizeof(client_addr);
+    int c_socket = accept(s_socket,(struct sockaddr*)&client_addr,&client_addr_size);
 
     while(1)
     {
-        int client_addr_size = sizeof(client_addr);
-        int c_socket = accept(s_socket,(struct sockaddr*)&client_addr,&client_addr_size);
-        if(c_socket == -1){
+
+        if(c_socket < -1){
             printf("Client Accept Failed\n");
             return -1;
         }
@@ -59,14 +60,13 @@ int main(int argc, char* argv[])
             return -1;
         }
 
-        printf("receive: %s \n",buff_rcv);
+        printf("%s \n",buff_rcv);
 
 
         //sprintf(buff_snd,"%s",buff_rcv);
         write(c_socket,buff_rcv,strlen(buff_rcv)+1);
-        close(c_socket);
     }
-
+    close(c_socket);
 
 
 

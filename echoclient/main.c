@@ -33,25 +33,29 @@ int main(int argc,char * argv[])
         return -1;
     }
 
-    int write_R;
-    int read_R;
-    char send_text[BUFF_SIZE];
+    int send_R;
+    int recv_R;
+    char chat_buff[BUFF_SIZE];
+    char send_buff[BUFF_SIZE];
+    //char rcv_buff[BUFF_SIZE];
     while(1)
     {
 
-        //fgets(send_text,100,stdin);
-        scanf("%s",send_text);
-        write_R = (int)write(c_socket,send_text,strlen(send_text));
-        //send(c_socket,send_text,strlen(send_text),0);
-        //printf("TEST\n");
+        fgets(chat_buff,100,stdin);
 
-        if(write_R == -1) printf("Write Failed\n");
+        sprintf(send_buff,"Jun: %s \n",chat_buff);
+        send_R = send(c_socket,send_buff,sizeof(send_buff),0);
+        if(send_R == -1) printf("Send Failed\n");
+        memset(chat_buff,0,BUFF_SIZE);
+        memset(send_buff,0,BUFF_SIZE);
 
-        char buff[1024];
-        read_R = (int)read(c_socket,buff,1024);
-        if(read_R == -1) printf("Read Failed\n");
 
-        printf("%s\n",buff);
+        recv(c_socket,chat_buff,BUFF_SIZE,0);
+        if(recv_R == -1) printf("Recv Failed\n");
+
+        printf("%s\n",chat_buff);
+        memset(chat_buff,0,BUFF_SIZE);
+
     }
 
     close(c_socket);
