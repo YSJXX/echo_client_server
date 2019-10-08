@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 #define BUFF_SIZE 1024
-c
+
 int main(int argc,char * argv[])
 {
     int c_socket = socket(AF_INET,SOCK_STREAM,0);
@@ -37,13 +37,22 @@ int main(int argc,char * argv[])
     int recv_R;
     char chat_buff[BUFF_SIZE];
     char send_buff[BUFF_SIZE];
+    char comp[10]="exit";
     //char rcv_buff[BUFF_SIZE];
     while(1)
     {
 
-        fgets(chat_buff,100,stdin);
-
-        sprintf(send_buff,"Jun: %s \n",chat_buff);
+        //fgets(chat_buff,100,stdin);
+        scanf("%s",chat_buff);
+        if(!strncmp(chat_buff,comp,4))
+        {
+            sprintf(send_buff,"----------------------was leave ");
+            send_R = send(c_socket,send_buff,sizeof(send_buff),0);
+            memset(send_buff,0,BUFF_SIZE);
+            close(c_socket);
+            break;
+        }
+        sprintf(send_buff,"Jun1: %s ",chat_buff);
         send_R = send(c_socket,send_buff,sizeof(send_buff),0);
         if(send_R == -1) printf("Send Failed\n");
         memset(chat_buff,0,BUFF_SIZE);
@@ -56,8 +65,9 @@ int main(int argc,char * argv[])
         printf("%s\n",chat_buff);
         memset(chat_buff,0,BUFF_SIZE);
 
+
+
     }
 
-    close(c_socket);
     return 0;
 }
