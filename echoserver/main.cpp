@@ -1,3 +1,4 @@
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -10,44 +11,34 @@
 
 #define BUFF_SIZE 1024
 
-struct Node {
-    int s_socket;
-    struct Node *next;
+using namespace std;
+
+static std::list<int> li;
+
+struct thread{
+    int socket;
 };
 
 
-
-struct thread_data{
-    int s_socket;
-    struct Node *head;
-};
-
-void *thread (void* arg)
+void *thread (void * arg)
 {
-
-    struct thread_data * data =(struct thread_data *)arg;
-
-    struct Node * head = (struct Node *)data->head;
-    int s_socket = data->s_socket;
-
+    struct thread * data=(struct thread *)arg;
+    int socket = data->socket;
     char buff_rcv[BUFF_SIZE];
-
-    while(1)
+    char msg[10]="Connect";
+    while(true)
     {
-        //printf("node->s_socket : %d\n",s_socket);
-        printf("2: node address : %p\n",(void *)head->next);
-        //head = head->next;
-        int read_R = (int)read(s_socket,buff_rcv,BUFF_SIZE);                     //Read
-        if(read_R == -1){
+        if(recv(socket,buff_rcv,BUFF_SIZE,0) == -1){
             printf("Read Failed\n");
             //return -1;
         }
+        if(!(strncmp(buff_rcv,msg,7))) memset(buff_rcv,0,BUFF_SIZE);
         printf("%s \n",buff_rcv);
 
-
-
-        //sprintf(buff_snd,"%s",buff_rcv);
-        write(s_socket,buff_rcv,strlen(buff_rcv)+1);
+        for(list<int>::iterator it=li.begin();it !=li.end();++it)
+        {
+            if(send(*it,buff_rcv,strlen(buff_rcv)+1,0) == -1)    printf("send Failed\n");
+        }
     }
 }
 
@@ -81,54 +72,25 @@ int main(int argc, char* argv[])
     pthread_t jthread;
 
 
-
     int listen_R = listen(s_socket,5);
     if(listen_R < 0){
         printf("Listen failed\n");
         return -1;
     }
-    std::list<int> list;
-    struct Node *head = malloc(sizeof (struct Node));
 
-    head->next =NULL;
-    head->s_socket = NULL;
+    struct thread *data=(struct thread*)malloc(sizeof(struct thread*));
 
     while(1)
     {
         int client_addr_size = sizeof(client_addr);
-        struct thread_data *data =malloc(sizeof(struct thread_data));
-        struct Node *node = malloc(sizeof (struct Node));
-        node->s_socket = accept(s_socket,(struct sockaddr*)&client_addr,&client_addr_size);
-        data->s_socket=node->s_socket;
-        if(node->s_socket < -1){
+        li.push_back(accept(s_socket,(struct sockaddr*)&client_addr,(socklen_t*)&client_addr_size));
+        if(li.back() < -1){
             printf("Client Accept Failed\n");
             return -1;
         }
-
-        if(head == NULL)
-        {
-            head = node;
-            head->next=NULL;
-        }
-        else
-        {
-            node->next = head;
-            head = node;
-        }
-
-        data->head =head;
-        printf("1: node address : %p\n",(void *)node);
-        printf("---------head address : %p\n",(void *)head);
-        pthread_create(&jthread,NULL,thread,(void *)data);
-        sleep(1);
+        data->socket=li.back();
+        pthread_create(&jthread,nullptr,thread,data);
     }
-    //int status;
-    //pthread_join(thread_listen,(void **)&status);
 
-
-
-    //close(list->s_socket);
-    free(head);
-    //free(list);
     return 0;
 }
